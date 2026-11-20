@@ -1,36 +1,17 @@
-#!/usr/bin/env python3
-"""news-image-20261119 entrypoint (Python 3.13, standard library only).
+"""news-image-20261119: write the entry image to the output directory.
 
-The front page is drawn at build time by draw.py (PIL, DejaVu fonts) and
-shipped in this repository as entry.png. This program only copies that
-file to the grader's output directory, so both graded runs write
-byte-identical bytes with no network and no third-party packages.
-
-Usage:
-    MAKEFUN_OUTPUT_DIR=out python3 main.py
-Writes <output dir>/entry.png (default /output).
+The entry is the image beside this file (entry.png): a newspaper front
+page summing up the world news of Thursday 19 November 2026. This
+program only places a copy where the grader looks, so the run is fully
+deterministic: the same bytes go out every time, with no network.
 """
 
 import os
 import shutil
+from pathlib import Path
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = Path(__file__).resolve().parent
+OUT = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
 
-
-def main():
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
-    os.makedirs(out_dir, exist_ok=True)
-    src = os.path.join(HERE, "entry.png")
-    dst = os.path.join(out_dir, "entry.png")
-    shutil.copyfile(src, dst)
-    # Guard the gate: a whole PNG of at most 1 MiB and 1024x1024.
-    with open(dst, "rb") as fh:
-        head = fh.read(8)
-    if head != b"\x89PNG\r\n\x1a\n":
-        raise ValueError("entry.png is not a PNG")
-    if os.path.getsize(dst) > 1048576:
-        raise ValueError("entry.png exceeds 1 MiB")
-
-
-if __name__ == "__main__":
-    main()
+OUT.mkdir(parents=True, exist_ok=True)
+shutil.copyfile(HERE / "entry.png", OUT / "entry.png")
